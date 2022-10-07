@@ -1,15 +1,15 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/gorilla/mux"
 	"math/rand"
+	"net/http"
+	"os"
 	"strconv"
 	"strings"
-	"io/ioutil"
-	"fmt"
 	"time"
-	"encoding/json"
-	"net/http"
-	"github.com/gorilla/mux"
 )
 
 const minResponseTime = 30
@@ -55,19 +55,19 @@ var SupportCollection []SupportItem
 var AccendentCollection []AccendentItem
 
 type MMSItem struct {
-	Country  string `json:"country"`
-	Provider string `json:"provider"`
-	Bandwidth string `json:"bandwidth"`
+	Country      string `json:"country"`
+	Provider     string `json:"provider"`
+	Bandwidth    string `json:"bandwidth"`
 	ResponseTime string `json:"response_time"`
 }
 
 type SupportItem struct {
-	Topic string `json:"topic"`
-	ActiveTickets int `json:"active_tickets"`
+	Topic         string `json:"topic"`
+	ActiveTickets int    `json:"active_tickets"`
 }
 
 type AccendentItem struct {
-	Topic string  `json:"topic"`
+	Topic  string `json:"topic"`
 	Status string `json:"status"`
 }
 
@@ -84,27 +84,26 @@ var AccendentTopics = []string{
 	"API Slow latency",
 }
 
-
 func init() {
 	rand.Seed(time.Now().UnixNano())
 
 	firstSMSRowForCorrupt = rand.Intn(70)
-	fmt.Printf("First SMS row for currupt %d\n", firstSMSRowForCorrupt + 1)
+	fmt.Printf("First SMS row for currupt %d\n", firstSMSRowForCorrupt+1)
 
 	secondSMSRowForCorrupt = rand.Intn(90)
-	fmt.Printf("Second SMS row for currupt %d\n", secondSMSRowForCorrupt + 1)
+	fmt.Printf("Second SMS row for currupt %d\n", secondSMSRowForCorrupt+1)
 
 	firstVoiceRowForCorrupt = rand.Intn(70)
-	fmt.Printf("First Voice row for currupt %d\n", firstVoiceRowForCorrupt + 1)
+	fmt.Printf("First Voice row for currupt %d\n", firstVoiceRowForCorrupt+1)
 
 	secondVoiceRowForCorrupt = rand.Intn(90)
-	fmt.Printf("Second Voice row for currupt %d\n", secondVoiceRowForCorrupt + 1)
+	fmt.Printf("Second Voice row for currupt %d\n", secondVoiceRowForCorrupt+1)
 
 	firstEmailRowForCorrupt = rand.Intn(70)
-	fmt.Printf("First Email row for currupt %d\n", firstEmailRowForCorrupt + 1)
+	fmt.Printf("First Email row for currupt %d\n", firstEmailRowForCorrupt+1)
 
 	secondEmailRowForCorrupt = rand.Intn(90)
-	fmt.Printf("Second Email row for currupt %d\n", secondEmailRowForCorrupt + 1)
+	fmt.Printf("Second Email row for currupt %d\n", secondEmailRowForCorrupt+1)
 }
 
 func main() {
@@ -124,7 +123,7 @@ func main() {
 
 func shuffleSmsData() {
 	var data string
-	for i, country := range(getCountriesList()) {
+	for i, country := range getCountriesList() {
 		row := strings.Join([]string{
 			country,
 			getRandomBandwidthInString(),
@@ -143,7 +142,7 @@ func shuffleSmsData() {
 		data += row
 	}
 
-	err := ioutil.WriteFile(getFilapathByFilename(smsFilename), []byte(data), 0644)
+	err := os.WriteFile(getFilapathByFilename(smsFilename), []byte(data), 0644)
 	if err != nil {
 		fmt.Printf("Error in write sms data: %s", err.Error())
 	}
@@ -151,13 +150,13 @@ func shuffleSmsData() {
 
 func shuffleMMSData() []MMSItem {
 	data := make([]MMSItem, 0)
-	for _, country := range(getCountriesList()) {
+	for _, country := range getCountriesList() {
 		data = append(
 			data,
 			MMSItem{
-				Country: country,
-				Provider: getMMSProviderByCountry(country),
-				Bandwidth: getRandomBandwidthInString(),
+				Country:      country,
+				Provider:     getMMSProviderByCountry(country),
+				Bandwidth:    getRandomBandwidthInString(),
 				ResponseTime: getRandomResponseTimeInString(),
 			},
 		)
@@ -168,7 +167,7 @@ func shuffleMMSData() []MMSItem {
 
 func shuffleVoiceData() {
 	var data string
-	for i, country := range(getCountriesList()) {
+	for i, country := range getCountriesList() {
 		row := strings.Join([]string{
 			country,
 			getRandomBandwidthInString(),
@@ -191,7 +190,7 @@ func shuffleVoiceData() {
 		data += row
 	}
 
-	err := ioutil.WriteFile(getFilapathByFilename(voiceFilename), []byte(data), 0644)
+	err := os.WriteFile(getFilapathByFilename(voiceFilename), []byte(data), 0644)
 	if err != nil {
 		fmt.Printf("Error in write sms data: %s", err.Error())
 	}
@@ -228,7 +227,7 @@ func shuffleEmailData() {
 		}
 	}
 
-	err := ioutil.WriteFile(getFilapathByFilename(emailFilename), []byte(data), 0644)
+	err := os.WriteFile(getFilapathByFilename(emailFilename), []byte(data), 0644)
 	if err != nil {
 		fmt.Printf("Error in write email data: %s", err.Error())
 	}
@@ -253,7 +252,7 @@ func shuffleBillingData() {
 		// checkout page
 	}
 
-	err := ioutil.WriteFile(getFilapathByFilename(billingFilename), []byte(data), 0644)
+	err := os.WriteFile(getFilapathByFilename(billingFilename), []byte(data), 0644)
 	if err != nil {
 		fmt.Printf("Error in write sms data: %s", err.Error())
 	}
@@ -406,7 +405,7 @@ func getRandomResponseTimeInString() string {
 func getRandomConnectionStability() string {
 	stability := getRandomIntBetweenValues(minConnectionStability, maxConnectionStability)
 
-	return fmt.Sprintf("%.2f", float32(stability) / 1000)
+	return fmt.Sprintf("%.2f", float32(stability)/1000)
 }
 
 func getRandomTTFB() string {
@@ -426,7 +425,7 @@ func getRandomEmailDeliveryTime() string {
 }
 
 func getRandomIntBetweenValues(min int, max int) int {
-	return rand.Intn(max - min) + min
+	return rand.Intn(max-min) + min
 }
 
 func listenAndServeHTTP() {
@@ -437,7 +436,10 @@ func listenAndServeHTTP() {
 	router.HandleFunc("/accendent", handleAccendent)
 	router.HandleFunc("/test", handleTest).Methods("GET", "OPTIONS")
 
-	http.ListenAndServe("127.0.0.1:8383", router)
+	err := http.ListenAndServe("127.0.0.1:8383", router)
+	if err != nil {
+		return
+	}
 }
 
 func handleMMS(w http.ResponseWriter, r *http.Request) {
@@ -455,11 +457,17 @@ func handleAccendent(w http.ResponseWriter, r *http.Request) {
 func handleTest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Write([]byte("{\n  \"status\": true,\n  \"data\": {\n    \"sms\": [\n      [\n        {\n          \"country\": \"Canada\",\n          \"bandwidth\": \"12\",\n          \"response_time\": \"67\",\n          \"provider\": \"Rond\"\n        },\n        {\n          \"country\": \"Great Britain\",\n          \"bandwidth\": \"98\",\n          \"response_time\": \"593\",\n          \"provider\": \"Kildy\"\n        },\n        {\n          \"country\": \"Russian Federation\",\n          \"bandwidth\": \"77\",\n          \"response_time\": \"1734\",\n          \"provider\": \"Topolo\"\n        }\n      ],\n      [\n        {\n          \"country\": \"Great Britain\",\n          \"bandwidth\": \"98\",\n          \"response_time\": \"593\",\n          \"provider\": \"Kildy\"\n        },\n        {\n          \"country\": \"Canada\",\n          \"bandwidth\": \"12\",\n          \"response_time\": \"67\",\n          \"provider\": \"Rond\"\n        },\n        {\n          \"country\": \"Russian Federation\",\n          \"bandwidth\": \"77\",\n          \"response_time\": \"1734\",\n          \"provider\": \"Topolo\"\n        }\n      ]\n    ],\n    \"mms\": [\n      [\n        {\n          \"country\": \"Great Britain\",\n          \"bandwidth\": \"98\",\n          \"response_time\": \"593\",\n          \"provider\": \"Kildy\"\n        },\n        {\n          \"country\": \"Canada\",\n          \"bandwidth\": \"12\",\n          \"response_time\": \"67\",\n          \"provider\": \"Rond\"\n        },\n        {\n          \"country\": \"Russian Federation\",\n          \"bandwidth\": \"77\",\n          \"response_time\": \"1734\",\n          \"provider\": \"Topolo\"\n        }\n      ],\n      [\n        {\n          \"country\": \"Canada\",\n          \"bandwidth\": \"12\",\n          \"response_time\": \"67\",\n          \"provider\": \"Rond\"\n        },\n        {\n          \"country\": \"Great Britain\",\n          \"bandwidth\": \"98\",\n          \"response_time\": \"593\",\n          \"provider\": \"Kildy\"\n        },\n        {\n          \"country\": \"Russian Federation\",\n          \"bandwidth\": \"77\",\n          \"response_time\": \"1734\",\n          \"provider\": \"Topolo\"\n        }\n      ]\n    ],\n    \"voice_call\": [\n      {\n        \"country\": \"US\",\n        \"bandwidth\": \"53\",\n        \"response_time\": \"321\",\n        \"provider\": \"TransparentCalls\",\n        \"connection_stability\": 0.72,\n        \"ttfb\": 442,\n        \"voice_purity\": 20,\n        \"median_of_call_time\": 5\n      },\n      {\n        \"country\": \"US\",\n        \"bandwidth\": \"53\",\n        \"response_time\": \"321\",\n        \"provider\": \"TransparentCalls\",\n        \"connection_stability\": 0.72,\n        \"ttfb\": 442,\n        \"voice_purity\": 20,\n        \"median_of_call_time\": 5\n      },\n      {\n        \"country\": \"US\",\n        \"bandwidth\": \"53\",\n        \"response_time\": \"321\",\n        \"provider\": \"E-Voice\",\n        \"connection_stability\": 0.72,\n        \"ttfb\": 442,\n        \"voice_purity\": 20,\n        \"median_of_call_time\": 5\n      },\n      {\n        \"country\": \"US\",\n        \"bandwidth\": \"53\",\n        \"response_time\": \"321\",\n        \"provider\": \"E-Voice\",\n        \"connection_stability\": 0.72,\n        \"ttfb\": 442,\n        \"voice_purity\": 20,\n        \"median_of_call_time\": 5\n      }\n    ],\n    \"email\": [\n      [\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 195\n        },\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 393\n        },\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 393\n        }\n      ],\n      [\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 393\n        },\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 393\n        },\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 393\n        }\n      ]\n    ],\n    \"billing\": {\n      \"create_customer\": true,\n      \"purchase\": true,\n      \"payout\": true,\n      \"recurring\": false,\n      \"fraud_control\": true,\n      \"checkout_page\": false\n    },\n    \"support\": [\n      3,\n      62\n    ],\n    \"incident\": [\n      {\"topic\":  \"Topic 1\", \"status\": \"active\"},\n      {\"topic\":  \"Topic 2\", \"status\": \"active\"},\n      {\"topic\":  \"Topic 3\", \"status\": \"closed\"},\n      {\"topic\":  \"Topic 4\", \"status\": \"closed\"}\n    ]\n  },\n  \"error\": \"\"\n}"))
+	_, err := w.Write([]byte("{\n  \"status\": true,\n  \"data\": {\n    \"sms\": [\n      [\n        {\n          \"country\": \"Canada\",\n          \"bandwidth\": \"12\",\n          \"response_time\": \"67\",\n          \"provider\": \"Rond\"\n        },\n        {\n          \"country\": \"Great Britain\",\n          \"bandwidth\": \"98\",\n          \"response_time\": \"593\",\n          \"provider\": \"Kildy\"\n        },\n        {\n          \"country\": \"Russian Federation\",\n          \"bandwidth\": \"77\",\n          \"response_time\": \"1734\",\n          \"provider\": \"Topolo\"\n        }\n      ],\n      [\n        {\n          \"country\": \"Great Britain\",\n          \"bandwidth\": \"98\",\n          \"response_time\": \"593\",\n          \"provider\": \"Kildy\"\n        },\n        {\n          \"country\": \"Canada\",\n          \"bandwidth\": \"12\",\n          \"response_time\": \"67\",\n          \"provider\": \"Rond\"\n        },\n        {\n          \"country\": \"Russian Federation\",\n          \"bandwidth\": \"77\",\n          \"response_time\": \"1734\",\n          \"provider\": \"Topolo\"\n        }\n      ]\n    ],\n    \"mms\": [\n      [\n        {\n          \"country\": \"Great Britain\",\n          \"bandwidth\": \"98\",\n          \"response_time\": \"593\",\n          \"provider\": \"Kildy\"\n        },\n        {\n          \"country\": \"Canada\",\n          \"bandwidth\": \"12\",\n          \"response_time\": \"67\",\n          \"provider\": \"Rond\"\n        },\n        {\n          \"country\": \"Russian Federation\",\n          \"bandwidth\": \"77\",\n          \"response_time\": \"1734\",\n          \"provider\": \"Topolo\"\n        }\n      ],\n      [\n        {\n          \"country\": \"Canada\",\n          \"bandwidth\": \"12\",\n          \"response_time\": \"67\",\n          \"provider\": \"Rond\"\n        },\n        {\n          \"country\": \"Great Britain\",\n          \"bandwidth\": \"98\",\n          \"response_time\": \"593\",\n          \"provider\": \"Kildy\"\n        },\n        {\n          \"country\": \"Russian Federation\",\n          \"bandwidth\": \"77\",\n          \"response_time\": \"1734\",\n          \"provider\": \"Topolo\"\n        }\n      ]\n    ],\n    \"voice_call\": [\n      {\n        \"country\": \"US\",\n        \"bandwidth\": \"53\",\n        \"response_time\": \"321\",\n        \"provider\": \"TransparentCalls\",\n        \"connection_stability\": 0.72,\n        \"ttfb\": 442,\n        \"voice_purity\": 20,\n        \"median_of_call_time\": 5\n      },\n      {\n        \"country\": \"US\",\n        \"bandwidth\": \"53\",\n        \"response_time\": \"321\",\n        \"provider\": \"TransparentCalls\",\n        \"connection_stability\": 0.72,\n        \"ttfb\": 442,\n        \"voice_purity\": 20,\n        \"median_of_call_time\": 5\n      },\n      {\n        \"country\": \"US\",\n        \"bandwidth\": \"53\",\n        \"response_time\": \"321\",\n        \"provider\": \"E-Voice\",\n        \"connection_stability\": 0.72,\n        \"ttfb\": 442,\n        \"voice_purity\": 20,\n        \"median_of_call_time\": 5\n      },\n      {\n        \"country\": \"US\",\n        \"bandwidth\": \"53\",\n        \"response_time\": \"321\",\n        \"provider\": \"E-Voice\",\n        \"connection_stability\": 0.72,\n        \"ttfb\": 442,\n        \"voice_purity\": 20,\n        \"median_of_call_time\": 5\n      }\n    ],\n    \"email\": [\n      [\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 195\n        },\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 393\n        },\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 393\n        }\n      ],\n      [\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 393\n        },\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 393\n        },\n        {\n          \"country\": \"RU\",\n          \"provider\": \"Gmail\",\n          \"delivery_time\": 393\n        }\n      ]\n    ],\n    \"billing\": {\n      \"create_customer\": true,\n      \"purchase\": true,\n      \"payout\": true,\n      \"recurring\": false,\n      \"fraud_control\": true,\n      \"checkout_page\": false\n    },\n    \"support\": [\n      3,\n      62\n    ],\n    \"incident\": [\n      {\"topic\":  \"Topic 1\", \"status\": \"active\"},\n      {\"topic\":  \"Topic 2\", \"status\": \"active\"},\n      {\"topic\":  \"Topic 3\", \"status\": \"closed\"},\n      {\"topic\":  \"Topic 4\", \"status\": \"closed\"}\n    ]\n  },\n  \"error\": \"\"\n}"))
+	if err != nil {
+		panic(fmt.Sprintf("%v in request %v", err, r))
+	}
 }
 
 func response(w http.ResponseWriter, r *http.Request, responseStruct interface{}) {
 	response, _ := json.Marshal(responseStruct)
 
-	w.Write(response)
+	_, err := w.Write(response)
+	if err != nil {
+		return
+	}
 }
