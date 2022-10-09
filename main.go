@@ -3,13 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
 	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"skillbox-diploma/collectors"
+
+	"github.com/gorilla/mux"
 )
 
 const minResponseTime = 30
@@ -117,6 +120,8 @@ func main() {
 
 	SupportCollection = shuffleSupportData()
 	AccendentCollection = shuffleAccendentData()
+
+	collectors.SMSCollector()
 
 	listenAndServeHTTP()
 }
